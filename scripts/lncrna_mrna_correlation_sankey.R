@@ -39,13 +39,13 @@ cor_cutoff <- ifelse(length(args) >= 5, as.numeric(args[5]), default_cor_cutoff)
 fdr_cutoff <- ifelse(length(args) >= 6, as.numeric(args[6]), default_fdr_cutoff)
 
 if (is.na(cor_cutoff) || is.na(fdr_cutoff)) {
-  stop("cor_cutoff and fdr_cutoff must be numeric.")
+  stop("cor_cutoff 和 fdr_cutoff 必须是数值。")
 }
 
 if (length(args) > 0 && length(args) < 4) {
   warning(
     paste0(
-      "Detected partial arguments. Recommended full usage: Rscript scripts/lncrna_mrna_correlation_sankey.R ",
+      "检测到仅传入了部分参数。推荐完整用法：Rscript scripts/lncrna_mrna_correlation_sankey.R ",
       "<expression.tsv> <lncrna_list.txt> <mrna_list.txt> <output_prefix> [cor_cutoff=0.3] [fdr_cutoff=0.05]"
     )
   )
@@ -62,7 +62,7 @@ if (!dir.exists(out_dir)) {
 # -----------------------------
 expr <- fread(expr_file)
 if (!"gene" %in% colnames(expr)) {
-  stop("Expression file must contain a first column named 'gene'.")
+  stop("表达矩阵必须包含名为 gene 的第一列。")
 }
 
 lnc_genes <- fread(lnc_file, header = FALSE)$V1
@@ -71,7 +71,7 @@ mrna_genes <- fread(mrna_file, header = FALSE)$V1
 # 仅保留两组基因的并集，减少后续计算量
 expr_sub <- expr[gene %in% unique(c(lnc_genes, mrna_genes))]
 if (nrow(expr_sub) == 0) {
-  stop("No overlapping genes found between expression matrix and input gene lists.")
+  stop("表达矩阵与输入基因列表没有重叠基因。")
 }
 
 # 转为矩阵，行为基因，列为样本
@@ -83,7 +83,7 @@ lnc_keep <- intersect(lnc_genes, rownames(expr_mat))
 mrna_keep <- intersect(mrna_genes, rownames(expr_mat))
 
 if (length(lnc_keep) < 2 || length(mrna_keep) < 2) {
-  stop("Need at least 2 lncRNAs and 2 mRNAs after overlap filtering.")
+  stop("重叠筛选后至少需要 2 个 lncRNA 和 2 个 mRNA。")
 }
 
 # -----------------------------
@@ -112,7 +112,7 @@ fwrite(edges, paste0(out_prefix, "_all_correlations.tsv"), sep = "\t")
 fwrite(edges_sig, paste0(out_prefix, "_significant_edges.tsv"), sep = "\t")
 
 if (nrow(edges_sig) == 0) {
-  message("No significant lncRNA-mRNA pairs under current thresholds. Only table outputs were generated.")
+  message("在当前阈值下未发现显著的 lncRNA-mRNA 配对，仅输出结果表格。")
   quit(save = "no")
 }
 
@@ -182,7 +182,7 @@ p <- ggplot(
 pdf_file <- paste0(out_prefix, "_sankey.pdf")
 ggsave(pdf_file, p, width = pdf_width, height = pdf_height, device = "pdf")
 
-message("Done. Outputs:")
+message("分析完成，输出文件如下：")
 message("- ", paste0(out_prefix, "_all_correlations.tsv"))
 message("- ", paste0(out_prefix, "_significant_edges.tsv"))
 message("- ", pdf_file)
